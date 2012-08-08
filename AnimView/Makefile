@@ -9,7 +9,7 @@ CFLAGS= `wx-config --cflags`
 LIBS= `wx-config --libs`
 
 ALL_T= AnimViewer
-ALL_O= app.o frmMain.o frmSprites.o rnc.o th.o
+ALL_O= app.o frmMain.o frmSprites.o rnc.o th.o tinystr.o tinyxml.o tinyxmlerror.o tinyxmlparser.o
 
 default: all
 
@@ -36,3 +36,14 @@ rnc.o:
 th.o:
 	$(CPP) -c th.cpp $(CFLAGS)
 
+tinystr.o:
+	$(CPP) -c tinystr.cpp $(CFLAGS)
+
+tinyxml.o:
+	$(CPP) -c tinyxml.cpp $(CFLAGS)
+
+tinyxmlerror.o:
+	$(CPP) -c tinyxmlerror.cpp $(CFLAGS)
+
+tinyxmlparser.o:
+	$(CPP) -c tinyxmlparser.cpp $(CFLAGS)
