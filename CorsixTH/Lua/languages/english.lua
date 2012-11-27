@@ -127,7 +127,9 @@ adviser = {
     falling_3 = "Ouch, that had to hurt, someone call a Doctor!",
     falling_4 = "This is an Hospital, not a Theme Park!",
     falling_5 = "This is not the place for knocking people over, they're ill you know!",
-    falling_6 = "This is not a bowling alley, sick people should not be treated like that!"
+    falling_6 = "This is not a bowling alley, sick people should not be treated like that!",
+    research_screen_open_1 = "You have to build a Research Department before you can access the Reasearch screen.",
+    research_screen_open_2 = "Research is disabled for the current level.",
   },
   cheats = {  
     th_cheat = "Congratulations, you have unlocked cheats!",
@@ -330,6 +332,7 @@ information = {
     balance = "Your bank balance fell below %d.",
     percentage_killed = "You killed more than %d percent of the patients.",
   },
+  cheat_not_possible = "Cannot use that cheat on this level. You even fail to cheat, not that funny huh?",
 }
 
 tooltip.information = {
@@ -383,6 +386,7 @@ cheats_window = {
     all_research = "All Research Cheat",
     emergency = "Create Emergency",
     vip = "Create VIP",
+    earthquake = "Create Earthquake",
     create_patient = "Create Patient",
     end_month = "End of Month",
     end_year = "End of Year",
@@ -399,6 +403,7 @@ tooltip.cheats_window = {
     all_research = "Completes all research.",
     emergency = "Creates an emergency.",
     vip = "Creates a VIP.",
+    earthquake = "Creates an earthquake.",
     create_patient = "Creates a Patient at the map border.",
     end_month = "Jumps to the end of the month.",
     end_year = "Jumps to the end of the year.",

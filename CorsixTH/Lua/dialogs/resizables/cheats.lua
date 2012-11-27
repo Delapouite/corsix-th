@@ -60,6 +60,7 @@ function UICheats:UICheats(ui)
     {name = "all_research",   func = self.cheatResearch},
     {name = "emergency",      func = self.cheatEmergency},
     {name = "vip",            func = self.cheatVip},
+    {name = "earthquake",     func = self.cheatEarthquake},
     {name = "create_patient", func = self.cheatPatient},
     {name = "end_month",      func = self.cheatMonth},
     {name = "end_year",       func = self.cheatYear},
@@ -122,13 +123,18 @@ function UICheats:updateCheatedStatus()
 end
 
 function UICheats:buttonClicked(num)
-  local announcements = self.ui.app.world.cheat_announcements
-  if announcements then
-    self.ui:playSound(announcements[math.random(1, #announcements)])
+  -- Only the cheats that may fail return false in that case. All others return nothing.
+  if self.cheats[num].func(self) ~= false then
+    local announcements = self.ui.app.world.cheat_announcements
+    if announcements then
+      self.ui:playSound(announcements[math.random(1, #announcements)])
+    end
+    self.ui.hospital.cheated = true
+    self:updateCheatedStatus()
+  else
+    -- It was not possible to use this cheat.
+    self.ui:addWindow(UIInformation(self.ui, {_S.information.cheat_not_possible}))
   end
-  self.ui.hospital.cheated = true
-  self:updateCheatedStatus()
-  self.cheats[num].func(self)
 end
 
 function UICheats:cheatMoney()
@@ -152,6 +158,10 @@ end
 
 function UICheats:cheatVip()
   self.ui.hospital:createVip()
+end
+
+function UICheats:cheatEarthquake()
+  return self.ui.app.world:createEarthquake()
 end
 
 function UICheats:cheatPatient()

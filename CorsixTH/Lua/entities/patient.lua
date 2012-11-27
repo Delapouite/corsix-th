@@ -158,7 +158,8 @@ function Patient:treated() -- If a drug was used we also need to pay for this
   local amount = self.hospital.disease_casebook[self.disease.id].drug_cost or 0
   hospital:receiveMoneyForTreatment(self)
   if amount ~= 0 then
-    hospital:spendMoney(amount, _S.transactions.drug_cost)
+  local str = _S.drug_companies[math.random(1 , 5)]
+  hospital:spendMoney(amount, _S.transactions.drug_cost .. ": " .. str)
   end
 
   -- Either the patient is no longer sick, or he/she dies.
@@ -208,12 +209,16 @@ function Patient:treated() -- If a drug was used we also need to pay for this
 end
 
 function Patient:die()
-  if self.hospital.num_deaths < 1 then
+  -- It may happen that this patient was just cured and then the room blew up.
+  -- (Hospital not set when going home)
+  local hospital = self.hospital or self.world:getLocalPlayerHospital()
+  
+  if hospital.num_deaths < 1 then
     self.world.ui.adviser:say(_A.information.first_death)
   end
-  self.hospital:humanoidDeath(self)
+  hospital:humanoidDeath(self)
   if not self.is_debug then
-    local casebook = self.hospital.disease_casebook[self.disease.id]
+    local casebook = hospital.disease_casebook[self.disease.id]
     casebook.fatalities = casebook.fatalities + 1
   end
   self:setMood("dead", "activate")
@@ -225,7 +230,7 @@ function Patient:die()
     self:setNextAction{name = "meander", count = 1}
   end  
   if self.is_emergency then
-    self.hospital.emergency.killed_emergency_patients = self.hospital.emergency.killed_emergency_patients + 1
+    hospital.emergency.killed_emergency_patients = hospital.emergency.killed_emergency_patients + 1
   end
   self:queueAction{name = "die"}
   self:updateDynamicInfo(_S.dynamic_info.patient.actions.dying)
@@ -767,7 +772,7 @@ function Patient:tickDay()
   end
 end
 
--- Called each time the patients moves to a new tile.
+-- Called each time the patient moves to a new tile.
 function Patient:setTile(x, y)
   -- Is the patient about to drop some litter?
   if self.litter_countdown then
@@ -781,7 +786,10 @@ function Patient:setTile(x, y)
         litter:setLitterType(trash, math.random(0, 1))
         if not self.hospital.hospital_littered then
           self.hospital.hospital_littered = true
-          self.world.ui.adviser:say(_A.staff_advice.need_handyman_litter)
+          -- A callout is only needed if there are no handymen employed
+          if not self.hospital:hasStaffOfCategory("Handyman") then
+            self.world.ui.adviser:say(_A.staff_advice.need_handyman_litter)
+          end
         end
       end
       self.litter_countdown = nil

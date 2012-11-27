@@ -28,7 +28,7 @@ local assert, io, type, dofile, loadfile, pcall, tonumber, print, setmetatable
 
 -- Increment each time a savegame break would occur
 -- and add compatibility code in afterLoad functions
-local SAVEGAME_VERSION = 51
+local SAVEGAME_VERSION = 57
 
 class "App"
 
@@ -357,7 +357,6 @@ function App:loadLevel(level, ...)
       world = {room_built = self.world.room_built},
       hospital = {
         player_salary = self.ui.hospital.player_salary,
-        research_dep_built = self.ui.hospital.research_dep_built,
         message_popup = self.ui.hospital.message_popup,
         hospital_littered = self.ui.hospital.hospital_littered,
       },
@@ -460,13 +459,37 @@ function App:dumpStrings()
   dump_grouped(fi, _S, "")
   fi:close()
   
-  -- Compares strings provided by language file of current language WITHOUT inheritance
-  -- with strings provided by english language with inheritance (i.e. all strings).
-  -- This will give translators an idea which strings are missing in their translation.
+  self:checkMissingStringsInLanguage(dir, self.config.language)
+  -- Uncomment these lines to get diffs for all languages in the game
+  -- for _, lang in ipairs(self.strings.languages_english) do
+  --   self:checkMissingStringsInLanguage(dir, lang)
+  -- end
+end
+
+--! Compares strings provided by language file of given language WITHOUT inheritance
+-- with strings provided by english language with inheritance (i.e. all strings).
+-- This will give translators an idea which strings are missing in their translation.
+--!param dir The directory where the file to write to should be.
+--!param language The language to check against.
+function App:checkMissingStringsInLanguage(dir, language)
+
+  -- Accessors to reach through the userdata proxies on strings
+  local LUT = debug.getregistry().StringProxyValues
+  local function val(o)
+    if type(o) == "userdata" then
+      return LUT[o]
+    else
+      return o
+    end
+  end
+  local function is_table(o)
+    return type(val(o)) == "table"
+  end
+
   local ltc = self.strings.language_to_chunk
-  if ltc[self.config.language] ~= ltc["english"] then
+  if ltc[language] ~= ltc["english"] then
     local str_en = self.strings:load("english", true)
-    local str_cur = self.strings:load(self.config.language, true, true)
+    local str_cur = self.strings:load(language, true, true)
     local function dump_diff(file, obj1, obj2, prefix)
       for n, o in pairs(obj1) do
         if n ~= "deprecated" then
@@ -488,13 +511,13 @@ function App:dumpStrings()
         end
       end
     end
-    fi = assert(io.open(dir .. "debug-strings-diff.txt", "wt"))
+    local fi = assert(io.open(dir .. "debug-strings-diff-" .. language:lower() .. ".txt", "wt"))
     fi:write("------------------------------------\n")
-    fi:write("MISSING STRINGS IN LANGUAGE \"" .. self.config.language:upper() .. "\":\n")
+    fi:write("MISSING STRINGS IN LANGUAGE \"" .. language:upper() .. "\":\n")
     fi:write("------------------------------------\n")
     dump_diff(fi, str_en, str_cur, "")
     fi:write("------------------------------------\n")
-    fi:write("SUPERFLUOUS STRINGS IN LANGUAGE \"" .. self.config.language:upper() .. "\":\n")
+    fi:write("SUPERFLUOUS STRINGS IN LANGUAGE \"" .. language:upper() .. "\":\n")
     fi:write("------------------------------------\n")
     dump_diff(fi, str_cur, str_en, "")
     fi:close()
@@ -939,10 +962,16 @@ end
 --! Returns the version number (name) of the local copy of the game based on
 --! which save game version it is. This was added after the Beta 8
 --! release, which is why the checks prior to that version aren't made.
-function App:getVersion()
-  local ver = self.savegame_version
-  if ver > 51 then
+--!param version An optional value if you want to find what game version
+-- a specific savegame verion is from.
+function App:getVersion(version)
+  local ver = version or self.savegame_version
+  if ver > 54 then
     return "Trunk"
+  elseif ver > 53 then
+    return "0.11"
+  elseif ver > 51 then
+    return "0.10"
   elseif ver > 45 then
     return "0.01"
   else
@@ -1008,14 +1037,23 @@ function App:afterLoad()
     self.world.game_log = {}
     self.world:gameLog("Created Gamelog on load of old (pre-versioning) savegame.")
   end
-  
+  if not self.world.original_savegame_version then
+    self.world.original_savegame_version = old
+  end
+  local first = self.world.original_savegame_version
   if new == old then
+    self.world:gameLog("Savegame version is " .. new .. " (" .. self:getVersion() 
+      .. "), originally it was " .. first .. " (" .. self:getVersion(first) .. ")")
     return
   elseif new > old then
-    self.world:gameLog("Savegame version changed from " .. old .. " to " .. new .. ".")
+    self.world:gameLog("Savegame version changed from " .. old .. " (" .. self:getVersion(old) ..
+                       ") to " .. new .. " (" .. self:getVersion() .. 
+                       "). The save was created using " .. first .. 
+                       " (" .. self:getVersion(first) .. ")")
   else
     -- TODO: This should maybe be forbidden completely.
-    self.world:gameLog("Warning: loaded savegame version " .. old .. " in older version " .. new .. ".")
+    self.world:gameLog("Warning: loaded savegame version " .. old .. " (" .. self:getVersion(old) ..
+                       ")" .. " in older version " .. new .. " (" .. self:getVersion() .. ").")
   end
   self.world.savegame_version = new
   

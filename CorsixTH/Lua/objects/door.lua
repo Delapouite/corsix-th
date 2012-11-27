@@ -141,10 +141,16 @@ function Door:setAnimation(animation, flags)
 end
 
 function Door:closeDoor()
-  self.queue:rerouteAllPatients({name = "seek_room", room_type = self:getRoom().room_info.id})
+  if self.queue then
+    self.queue:rerouteAllPatients({name = "seek_room", room_type = self:getRoom().room_info.id})
+    self.queue = nil
+  end
   self:clearDynamicInfo(nil)
   self.hover_cursor = nil
-  self.queue = nil
+end
+
+function Door:getDrawingLayer()
+  return 0
 end
 
 function Door:checkForDeadlock()
@@ -166,4 +172,19 @@ function Door:checkForDeadlock()
   end
 end
 
+function Door:afterLoad(old, new)
+  if old < 57 then
+    local flags_to_set
+    local map = self.world.map
+    if self.direction == "west" then
+      flags_to_set = {buildableNorth = false, buildableSouth = false}
+      map:setCellFlags(self.tile_x, self.tile_y, flags_to_set)
+      map:setCellFlags(self.tile_x - 1, self.tile_y, flags_to_set)
+    else
+      flags_to_set = {buildableEast = false, buildableWest = false}
+      map:setCellFlags(self.tile_x, self.tile_y, flags_to_set)
+      map:setCellFlags(self.tile_x, self.tile_y - 1, flags_to_set)
+    end
+  end
+end
 return object

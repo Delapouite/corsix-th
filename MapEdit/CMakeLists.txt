@@ -12,6 +12,7 @@ FILE(GLOB_RECURSE mapedit_source_files
   ${CMAKE_SOURCE_DIR}/MapEdit/Src/*.cpp
   ${CMAKE_SOURCE_DIR}/MapEdit/Src/*.c
   ${CMAKE_SOURCE_DIR}/MapEdit/Src/*.h
+  ${CMAKE_SOURCE_DIR}/MapEdit/MapEdit.rc
   ${CMAKE_SOURCE_DIR}/CorsixTH/Src/*.h
   ${CMAKE_SOURCE_DIR}/CorsixTH/Src/*.c
   ${CMAKE_SOURCE_DIR}/CorsixTH/Src/*.cpp
@@ -48,8 +49,8 @@ IF(APPLE)
     ${CMAKE_SOURCE_DIR}/CorsixTH/Lua
   )
   add_custom_command(TARGET MapEdit 
-					 POST_BUILD
-					 COMMAND /Developer/Library/PrivateFrameworks/DevToolsCore.framework/Resources/pbxcp -exclude .DS_Store -exclude CVS -exclude .svn -resolve-src-symlinks ${corsixth_bundle_resources} \${TARGET_BUILD_DIR}/\${FULL_PRODUCT_NAME}/Contents/Resources
+    POST_BUILD
+    COMMAND /Developer/Library/PrivateFrameworks/DevToolsCore.framework/Resources/pbxcp -exclude .DS_Store -exclude CVS -exclude .svn -resolve-src-symlinks ${corsixth_bundle_resources} \${TARGET_BUILD_DIR}/\${FULL_PRODUCT_NAME}/Contents/Resources
 )
 
 ELSE()
@@ -164,7 +165,7 @@ IF(APPLE)
 
   #Copy the required frameworks into the bundle.
   IF(SDL_FOUND)
-	IF(SDL_LIBRARY MATCHES "\\.framework") #Only copy if it's an actual framework.
+    IF(SDL_LIBRARY MATCHES "\\.framework") #Only copy if it's an actual framework.
       string(REPLACE "-framework Cocoa" "" SDL_FRAMEWORK_LOC ${SDL_LIBRARY})
       install(DIRECTORY ${SDL_FRAMEWORK_LOC} DESTINATION MapEdit.app/Contents/Frameworks)
     ENDIF()
@@ -178,7 +179,7 @@ IF(APPLE)
 
   IF(LUA51_FOUND)
     IF(${LUA_LIBRARY} MATCHES "\\.framework$") #Only copy if it's an actual framework.
-  	  install(DIRECTORY ${LUA_LIBRARY} DESTINATION MapEdit.app/Contents/Frameworks)
+      install(DIRECTORY ${LUA_LIBRARY} DESTINATION MapEdit.app/Contents/Frameworks)
     ENDIF()
   ENDIF()
 

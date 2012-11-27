@@ -177,7 +177,7 @@ shake_fist_anim("Standard Male Patient",     392) -- bloaty head patients lose h
 ----+-----------------------------------+-----+
 vomit_anim("Elvis Patient",              1034)
 vomit_anim("Standard Female Patient",    3184)
-vomit_anim("Standard Male Patient",      4476)
+vomit_anim("Standard Male Patient",      2056)
 vomit_anim("Alternate Male Patient",     4476)
 vomit_anim("Chewbacca Patient",          4138)
 vomit_anim("Invisible Patient",          4204)
@@ -288,6 +288,7 @@ end
 
 -- Save game compatibility
 function Humanoid:afterLoad(old, new)
+
   if old < 38 then
     -- should existing patients be updated and be getting really ill?
     -- adds the new variables for health icons 
@@ -489,12 +490,10 @@ local function Humanoid_startAction(self)
     self.world:setSpeed("Pause")
 
     -- Tell the player what just happened.
+    self.world:gameLog("")
     self.world:gameLog("Empty action queue!")
+    self.world:gameLog("Last action: " .. self.previous_action.name)
     self.world:gameLog(debug.traceback())
-    print("")
-    print("Empty action queue!")
-    print("Last action: " .. self.previous_action.name)
-    print(debug.traceback())
 
     ui:addWindow(UIConfirmDialog(ui,
       "Sorry, a humanoid just had an empty action queue,"..
@@ -814,4 +813,8 @@ function Humanoid:unregisterCallbacks()
     self:message_callback(true)
     self.message_callback = nil
   end
+end
+
+function Humanoid:getDrawingLayer()
+  return 4
 end

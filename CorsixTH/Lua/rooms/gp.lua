@@ -124,7 +124,7 @@ function GPRoom:dealtWithPatient(patient)
     self.hospital:receiveMoneyForTreatment(patient)
     
     patient:completeDiagnosticStep(self)
-    if patient.diagnosis_progress >= (self.hospital.policies["stop_procedure"] * self.hospital.policies["guess_cure"])then
+    if patient.diagnosis_progress >= self.hospital.policies["stop_procedure"] then
       patient:setDiagnosed(true)
       patient:queueAction{name = "seek_room", room_type = patient.disease.treatment_rooms[1], treatment_room = true}
 
@@ -152,6 +152,12 @@ function GPRoom:dealtWithPatient(patient)
     patient:queueAction{name = "idle"}
   end
 
+  if self.dealt_patient_callback then
+    self.dealt_patient_callback(self.waiting_staff_member)
+  end
+  if self.staff_member then
+    self:setStaffMembersAttribute("dealing_with_patient", false)
+  end
   -- Maybe the staff member can go somewhere else
   self:findWorkForStaff()
 end

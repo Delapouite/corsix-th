@@ -61,17 +61,18 @@ object.usage_animations = copy_north_to_south {
 object.orientations = {
   north = {
     use_position = {-1, 1},
-    footprint = { {-2, -2}, {-1, -2}, {0, -2},
-                  {-2, -1}, {-1, -1}, {0, -1},
-                  {-2,  0}, {-1,  0}, {0,  0},
+    footprint = { {-2, -2, complete_cell = true}, {-1, -2, complete_cell = true}, {0, -2},
+                  {-2, -1, complete_cell = true}, {-1, -1, complete_cell = true}, {0, -1, complete_cell = true},
+                  {-2,  0, complete_cell = true}, {-1,  0, complete_cell = true}, {0,  0, complete_cell = true},
                   {-1,  1, only_passable = true}, },
     render_attach_position = {-1, 0},
   },
   east = {
     use_position = {1, -1},
-    footprint = { {-2, -2}, {-1, -2}, {0, -2},
-                  {-2, -1}, {-1, -1}, {0, -1}, {1, -1, only_passable = true},
-                  {-2,  0}, {-1,  0}, {0,  0}, },
+    footprint = { {-2, -2, complete_cell = true}, {-1, -2, complete_cell = true}, {0, -2, complete_cell = true},
+                  {-2, -1, complete_cell = true}, {-1, -1, complete_cell = true}, 
+                  {0, -1, complete_cell = true}, {1, -1, only_passable = true},
+                  {-2,  0}, {-1,  0, complete_cell = true}, {0,  0, complete_cell = true}, },
     render_attach_position = {-1, 0},
   },
 }
